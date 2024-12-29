@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    background-image: url('img1.jpg'); /* Add your background image here */
+    background-image: url('login.jpg'); /* Add your background image here */
     background-size: cover; /* Ensure the image covers the entire background */
     background-position: center; /* Center the image */
     background-repeat: no-repeat; 
