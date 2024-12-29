@@ -32,3 +32,40 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
+
+//home page scripting
+
+function searchMovie() {
+    const query = document.getElementById('search-bar').value;
+    // Implement search functionality using TMDB API
+    // Redirect or update the page with search results
+}
+
+function addToWishlist(movieId) {
+    fetch(`/add_to_wishlist/${movieId}`)
+        .then(response => {
+            if (response.ok) {
+                alert('Movie added to wishlist!');
+            } else {
+                alert('Failed to add movie to wishlist.');
+            }
+        });
+}
+
+function showGenres() {
+    // Implement genre search functionality
+}
+
+function toggleTheme() {
+    const body = document.body;
+    const themeToggleButton = document.getElementById('theme-toggle');
+
+    // Toggle between light and dark mode
+    if (body.classList.contains('dark-mode')) {
+        body.classList.remove('dark-mode');
+        themeToggleButton.innerHTML = '🌙'; // Change to moon emoji
+    } else {
+        body.classList.add('dark-mode');
+        themeToggleButton.innerHTML = '☀️'; // Change to sun emoji
+    }
+}
