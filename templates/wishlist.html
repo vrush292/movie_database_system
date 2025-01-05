@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='home_style.css') }}">
+    <title>Your Wishlist</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fce4ec;
+        }
+
+        .menu-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #d5006d;
+            padding: 10px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .menu-bar h2 {
+            margin: 0;
+            color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .wishlist-container {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .wishlist-item {
+            max-width: 200px;
+            text-align: center;
+        }
+
+        .wishlist-item img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #d5006d;
+            color: #ffffff;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-bar">
+        <h2>Your Wishlist</h2>
+        <ul>
+            <li><a href="{{ url_for('main_routes.home') }}">Home</a></li>
+            <li><a href="{{ url_for('main_routes.profile') }}">Profile</a></li>
+            <li><a href="{{ url_for('main_routes.wishlist') }}">Wishlist</a></li>
+            <li><a href="{{ url_for('api.signout') }}">Sign Out</a></li>
+        </ul>
+    </div>
+
+    <div class="wishlist-container">
+        {% for movie in movies %}
+            <div class="wishlist-item">
+                <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}">
+                <p>{{ movie.title }}</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <footer>
+        <p>NTA</p>
+    </footer>
+</body>
+</html>
