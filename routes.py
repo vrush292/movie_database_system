@@ -59,7 +59,7 @@ TMDB_API_KEY = '75439a8f9e551d13a91c261aa1062e5e'  # Replace with your TMDB API 
 @login_required  # Protect this route
 def home():
     trending_movies = get_trending_movies()
-    return render_template('home.html', trending_movies=trending_movies)
+    return render_template('home.html', trending_movies=trending_movies, movies=None)
 
 def get_trending_movies():
     try:
@@ -79,7 +79,7 @@ def movie_details(movie_id):
 
 def get_movie_details(movie_id):
     try:
-        response = requests.get(f'https://api.themoviedb.org/3/movie/{movie_id}?api_key={TMDB_API_KEY}')
+        response = requests.get(f'https://api.themoviedb.org/3/movie/{movie_id}?api_key={TMDB_API_KEY}&append_to_response=credits,videos,reviews')
         response.raise_for_status()  # Raise an error for bad responses
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -87,16 +87,49 @@ def get_movie_details(movie_id):
         flash('Error fetching movie details. Please try again later.', 'danger')
         return {}
 
-@main_routes.route ('/add_to_wishlist/<int:movie_id>')
+@main_routes.route('/search', methods=['GET'])
 @login_required  # Protect this route
-def add_to_wishlist(movie_id):
-    # Logic to add movie to wishlist
-    # Assuming you have a Wishlist model and a user_id field in it
-    wishlist_item = Wishlist(movie_id=movie_id, user_id=current_user.id)
-    db.session.add(wishlist_item)
-    db.session.commit()
-    flash('Movie added to your wishlist!', 'success')
-    return redirect(url_for('main_routes.home'))
+def search_movies():
+    query = request.args.get('query')
+    movies = []  # Initialize movies as an empty list
+
+    if query:
+        try:
+            response = requests.get(f'https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={query}')
+            response.raise_for_status()  # Raise an error for bad responses
+            movies = response.json().get('results', [])
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching search results: {e}")
+    flash('Error fetching search results. Please try again later.', 'danger')
+
+    return render_template('home.html', movies=movies, trending_movies=get_trending_movies())  # Pass the movies list to the template
+
+@main_routes.route('/toggle_wishlist/<int:movie_id>', methods=['POST'])
+@login_required  # Protect this route
+def toggle_wishlist(movie_id):
+    # Check if the movie is already in the user's wishlist
+    wishlist_item = Wishlist.query.filter_by(movie_id=movie_id, user_id=current_user.id).first()
+    
+    if wishlist_item:
+        # If it exists, remove it from the wishlist
+        db.session.delete(wishlist_item)
+        db.session.commit()
+        flash('Movie removed from your wishlist!', 'success')
+    else:
+        # If it does not exist, add it to the wishlist
+        wishlist_item = Wishlist(movie_id=movie_id, user_id=current_user.id)
+        db.session.add(wishlist_item)
+        db.session.commit()
+        flash('Movie added to your wishlist!', 'success')
+    
+    return redirect(url_for('main_routes.movie_details', movie_id=movie_id))  # Redirect back to the movie details page
+
+@main_routes.route('/wishlist')
+@login_required  # Protect this route
+def wishlist():
+    user_wishlist = Wishlist.query.filter_by(user_id=current_user.id).all()  # Fetch user's wishlist
+    movies = [Movie.query.get(item.movie_id) for item in user_wishlist]  # Get movie details for each wishlist item
+    return render_template('wishlist.html', movies=movies)  # Pass the movies list to the template
 
 @main_routes.route('/recommendation')
 @login_required  # Protect this route
@@ -106,10 +139,10 @@ def recommendation():
 @main_routes.route('/profile')
 @login_required  # Protect this route
 def profile():
-    return render_template('profile.html')  # Create a profile.html template
+    return render_template('profile.html')
 
-@main_routes.route('/wishlist')
+@main_routes.route('/about')
 @login_required  # Protect this route
-def wishlist():
-    user_wishlist = Wishlist.query.filter_by(user_id=current_user.id).all()  # Fetch user's wishlist
-    return render_template('wishlist.html', wishlist=user_wishlist)  # Create a wishlist.html template
+def about():
+    return render_template('about.html')
+
