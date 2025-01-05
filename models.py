@@ -11,6 +11,10 @@ class User(db.Model, UserMixin):  # Inherit from UserMixin
 
     def is_active(self):
         return True  # This method is now inherited from UserMixin
+    @property
+    def wishlist_movies(self):
+        """Return a list of movie IDs in the user's wishlist."""
+        return [item.movie_id for item in self.wishlist]
 
 class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -27,3 +31,4 @@ class Wishlist(db.Model):
     added_on = db.Column(db.DateTime, default=datetime.utcnow)
 
     movie = db.relationship('Movie', backref='wishlists', lazy=True)
+
