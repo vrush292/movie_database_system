@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='home_style.css') }}">
     <title>Home - Movie Recommendation 🎬</title>
+    <style>
+        /* Center the search results heading */
+        .search-results-heading {
+            text-align: center;
+            margin: 20px 0; /* Add some margin for spacing */
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -14,7 +21,7 @@
                 <li><a href="{{ url_for('main_routes.home') }}">Home</a></li>
                 <li><a href="{{ url_for('main_routes.profile') }}">Profile</a></li>
                 <li><a href="{{ url_for('main_routes.wishlist') }}">Wishlist</a></li>
-                <li><a href="{{ url_for('main_routes.home') }}">Settings</a></li>
+                <li><a href="{{ url_for('main_routes.about') }}">About</a></li>
                 <li><a href="{{ url_for('api.signout') }}">Sign Out</a></li>
                 <li>
                     <button id="theme-toggle" onclick="toggleTheme()">🌙</button> <!-- Moon emoji for dark mode -->
@@ -27,32 +34,46 @@
                 <h1>Welcome to the Movie App</h1>
                 <p>Find your favorite movies!</p>
                 <div class="search-panel">
-                    <input type="text" id="search-bar" placeholder="Search for a movie...">
-                    <button>Search</button>
+                    <form action="{{ url_for('main_routes.search_movies') }}" method="GET">
+                        <input type="text" id="search-bar" name="query" placeholder="Search for a movie..." required value="{{ query if query is not none else '' }}">
+                        <button type="submit">Search</button>
+                    </form>
                 </div>
-            </div>
             </div>
 
             <div class="options">
-                <button onclick="showGenres()">Search by Genre</button>
-                <button onclick="location.href='{{ url_for('main_routes.recommendation') }}'">Get Recommendations</button>
+                {% if movies is none %}
+                    <button onclick="showGenres()">Search by Genre</button>
+                    <button onclick="location.href='{{ url_for('main_routes.recommendation') }}'">Get Recommendations</button>
+                {% endif %}
             </div>
 
-            <h1>Trending Movies</h1>
-            <div class="movie-list">
-                {% for movie in trending_movies %}
-                    <div class="movie-item" onclick="location.href='{{ url_for('main_routes.movie_details', movie_id=movie.id) }}'">
-                        <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}">
-                        <h4>{{ movie.title }}</h4>
-                    </div>
-                {% endfor %}
-            </div>
+            {% if movies is not none and movies|length > 0 %}
+                <h1 class="search-results-heading">Search Results</h1> <!-- Display the search query -->
+                <div class="movie-list">
+                    {% for movie in movies %}
+                        <div class="movie-item" onclick="location.href='{{ url_for('main_routes.movie_details', movie_id=movie.id) }}'">
+                            <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}">
+                            <h4>{{ movie.title }}</h4>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <h1 class="search-results-heading">Trending Movies</h1>
+                <div class="movie-list">
+                    {% for movie in trending_movies %}
+                        <div class="movie-item" onclick="location.href='{{ url_for('main_routes.movie_details', movie_id=movie.id) }}'">
+                            <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}">
+                            <h4>{{ movie.title }}</h4>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
     </div>
 
     <footer>
-        <p>About: CoderChic 💻</p>
-        <p>Support: vrushalikarlekar2@gmail.com 📧</p>
+        <p>NTA</p>
     </footer>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
