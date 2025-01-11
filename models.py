@@ -30,5 +30,5 @@ class Wishlist(db.Model):
     movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'), nullable=False)
     added_on = db.Column(db.DateTime, default=datetime.utcnow)
 
-    movie = db.relationship('Movie', backref='wishlists', lazy=True)
+    movie = db.relationship('Movie', backref='wishlist', lazy=True)
 
