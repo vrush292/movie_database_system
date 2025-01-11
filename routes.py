@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from .models import db, User, Movie, Wishlist  # Assuming you have a User model defined
 from werkzeug.security import generate_password_hash, check_password_hash
 import requests
@@ -75,17 +75,37 @@ def get_trending_movies():
 @login_required  # Protect this route
 def movie_details(movie_id):
     movie = get_movie_details(movie_id)
-    return render_template('movie_details.html', movie=movie)
+    if movie is None:
+        return redirect(url_for('main_routes.home'))  # Redirect to home if movie not found
+    return render_template('movie_details.html', movie=movie, current_user=current_user)
 
 def get_movie_details(movie_id):
     try:
         response = requests.get(f'https://api.themoviedb.org/3/movie/{movie_id}?api_key={TMDB_API_KEY}&append_to_response=credits,videos,reviews')
         response.raise_for_status()  # Raise an error for bad responses
-        return response.json()
+        movie_data = response.json()
+
+        # Check if the movie already exists in the database
+        existing_movie = Movie.query.filter_by(id=movie_data['id']).first()
+        if not existing_movie:
+            # Create a new Movie instance
+            new_movie = Movie(
+                id=movie_data['id'],
+                title=movie_data['title'],
+                genre=movie_data['genres'][0]['name'] if movie_data['genres'] else 'N/A',  # Assuming you want the first genre
+                description=movie_data['overview'],
+                rating=movie_data['vote_average'],
+                poster_path=movie_data['poster_path']
+            )
+            db.session.add(new_movie)
+            db.session.commit()
+
+        return movie_data  # Return the movie data regardless of whether it was added or already existed
     except requests.exceptions.RequestException as e:
         print(f"Error fetching movie details: {e}")
         flash('Error fetching movie details. Please try again later.', 'danger')
-        return {}
+        return None  # Return None if there's an error
+
 
 @main_routes.route('/search', methods=['GET'])
 @login_required  # Protect this route
@@ -120,17 +140,26 @@ def toggle_wishlist(movie_id):
         wishlist_item = Wishlist(movie_id=movie_id, user_id=current_user.id)
         db.session.add(wishlist_item)
         db.session.commit()
+
+        current_wishlist = Wishlist.query.filter_by(user_id=current_user.id).all()
+        print(f"Current wishlist items after toggle: {current_wishlist}")  # Check if items are being added correctly
         flash('Movie added to your wishlist!', 'success')
     
-    return redirect(url_for('main_routes.movie_details', movie_id=movie_id))  # Redirect back to the movie details page
+    return jsonify({'status': 'success'})  # Return a JSON response
 
 @main_routes.route('/wishlist')
-@login_required  # Protect this route
+@login_required
 def wishlist():
-    user_wishlist = Wishlist.query.filter_by(user_id=current_user.id).all()  # Fetch user's wishlist
-    movies = [Movie.query.get(item.movie_id) for item in user_wishlist]  # Get movie details for each wishlist item
-    return render_template('wishlist.html', movies=movies)  # Pass the movies list to the template
+    
+    # Fetch the user's wishlist items
+    wishlist_items = Wishlist.query.filter_by(user_id=current_user.id).all()
+    
+    # Get the movies directly from the wishlist items
+    movies = [item.movie for item in wishlist_items]  
 
+    return render_template('wishlist.html', movies=movies)
+  
+    
 @main_routes.route('/recommendation')
 @login_required  # Protect this route
 def recommendation():
