@@ -43,6 +43,7 @@
         .wishlist-item img {
             width: 100%;
             border-radius: 10px;
+            cursor: pointer; /* Change cursor to pointer to indicate it's clickable */
         }
 
         footer {
@@ -70,13 +71,20 @@
 
     <div class="wishlist-container">
         {% for movie in movies %}
-            <div class="wishlist-item">
-                <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}">
-                <p>{{ movie.title }}</p>
-            </div>
+            {% if movie %}
+                <div class="wishlist-item">
+                    <a href="{{ url_for('main_routes.movie_details', movie_id=movie.id) }}">
+                        <img src="https://image.tmdb.org/t/p/w500{{ movie.poster_path }}" alt="{{ movie.title }}">
+                    </a>
+                    <p>{{ movie.title }}</p>
+                </div>
+            {% else %}
+                <p>Movie not found.</p>
+            {% endif %}
+        {% else %}
+            <p>No movies in your wishlist.</p>
         {% endfor %}
     </div>
-
     <footer>
         <p>NTA</p>
     </footer>
