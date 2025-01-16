@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+    <title>User Profile</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fce4ec;
+            min-height: 100vh;
+        }
+
+        .menu-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #d5006d;
+            padding: 15px 40px;
+            box-shadow: 0 2px 15px rgba(213, 0, 109, 0.2);
+        }
+
+        .menu-bar h2 {
+            margin: 0;
+            color: #ffffff;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 24px;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-bar ul {
+            list-style: none;
+            display: flex;
+            gap: 30px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .menu-bar a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            font-size: 16px;
+            transition: opacity 0.2s ease;
+        }
+
+        .menu-bar a:hover {
+            opacity: 0.8;
+        }
+
+        .profile-container {
+            display: flex;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(213, 0, 109, 0.1);
+            margin: 40px auto;
+            max-width: 900px;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .profile-picture {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            align-self: center;
+        }
+
+        .profile-picture img {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 3px solid #d5006d;
+        }
+
+        .edit-picture-button {
+            padding: 10px 20px;
+            background-color: #d5006d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .edit-picture-button:hover {
+            background-color: #b0004d; /* Darker shade on hover */
+        }
+
+        .profile-info {
+            flex: 2;
+        }
+
+        h1 {
+            text-align: center;
+            color: #d5006d;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 32px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #f0f0f0;
+            border-radius: 8px;
+            background-color: #f8f8f8;
+            color: #333;
+            font-size: 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #d5006d;
+            background-color: #fff;
+        }
+
+        .button-group {
+ display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 20px;
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        #update-button {
+            background-color: #4CAF50;
+            color: white;
+            flex: 2;
+        }
+
+        #delete-button {
+            background-color: #f44336;
+            color: white;
+            flex: 1;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .profile-container {
+                flex-direction: column;
+                margin: 20px;
+                padding: 20px;
+            }
+
+            .menu-bar {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .menu-bar ul {
+                gap: 15px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            #update-button, #delete-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-bar">
+        <h2>Movify</h2>
+        <ul>
+            <li><a href="{{ url_for('main_routes.home') }}">Home</a></li>
+            <li><a href="{{ url_for('main_routes.profile') }}">Profile</a></li>
+            <li><a href="{{ url_for('main_routes.wishlist') }}">Wishlist</a></li>
+            <li><a href="{{ url_for('api.signout') }}">Sign Out</a></li>
+        </ul>
+    </div>
+
+    <div class="profile-container">
+        <div class="profile-picture">
+            <img id="preview" src="{{ current_user.profile_picture or 'static/profile.jpg' }}" alt="Profile Picture Preview" style="display: block;">            
+            <button class="edit-picture-button" onclick="document.getElementById('profile-picture').click();">Edit Picture</button>
+            <input type="file" id="profile-picture" name="profile-picture" accept="image/*" style="display: none;" onchange="previewImage(event)">
+        </div>
+        <div class="profile-info">
+            <h1>User Profile</h1>
+            <form id="profile-form" method="POST" enctype="multipart/form-data" action="{{ url_for('main_routes.update_profile') }}">                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required placeholder="Enter your name" value="{{ current_user.username }}">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email" value="{{ current_user.email }}">
+                </div>
+                <div class="form-group">
+                    <label for="bio">Bio:</label>
+                    <textarea id="bio" name="bio" rows="4" placeholder="Tell us about yourself">{{ current_user.bio }}</textarea>
+                </div>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+                <div class="button-group">
+                    <button type="submit" id="update-button">Update Profile</button>
+                    <button type="button" id="delete-button">Delete Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <p>NTA</p>
+    </footer>
+
+    <script>
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('preview');
+            console.log("file is ",file);
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = 'static/profile.jpg'; // Reset to default if no file
+                preview.style.display = 'block';
+            }
+        }
+
+        document.getElementById('delete-button').addEventListener('click', function() {
+            const confirmation = confirm('Are you sure you want to delete your account?');
+            if (confirmation) {
+                alert('Account deleted successfully!');
+            }
+        });
+    </script>
+</body>
+</html>
