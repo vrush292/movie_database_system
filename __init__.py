@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager
-
+import os
 # Initialize extensions
 csrf = CSRFProtect()
 db = SQLAlchemy()
@@ -13,6 +13,9 @@ login_manager = LoginManager()  # Initialize the LoginManager
 def create_app():
     app = Flask(__name__)
     
+    profile_pictures_dir = 'static/profile_pictures'
+    if not os.path.exists(profile_pictures_dir):
+        os.makedirs(profile_pictures_dir)
     # Load configuration
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'  # Change to your database URI
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
