@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from .models import db, User, Movie, Wishlist  # Assuming you have a User model defined
 from werkzeug.security import generate_password_hash, check_password_hash
-import requests
+import requests,os
 from flask_login import login_user, logout_user, login_required, current_user
 
 # API routes
@@ -169,6 +169,37 @@ def recommendation():
 @login_required  # Protect this route
 def profile():
     return render_template('profile.html')
+
+@main_routes.route('/update_profile', methods=['POST'])
+@login_required  # Protect this route
+def update_profile():
+    profile_pictures_dir = 'static/profile_pictures'
+    if not os.path.exists(profile_pictures_dir):
+        os.makedirs(profile_pictures_dir)
+
+    name = request.form['name']
+    email = request.form['email']
+    bio = request.form['bio']
+    profile_picture = request.files.get('profile-picture')
+
+    # Update user information
+    current_user.username = name
+    current_user.email = email
+    current_user.bio = bio
+
+    # Handle profile picture upload
+    if profile_picture:
+        try:
+            profile_picture_path = f'static/profile_pictures/{current_user.id}.jpg'
+            profile_picture.save(profile_picture_path)
+            current_user.profile_picture = profile_picture_path
+            print("Profile picture saved at:", profile_picture_path)  # Debugging line
+        except Exception as e:
+            print("Error saving profile picture:", e)  # Error handling
+
+    db.session.commit()  # Commit the changes to the database
+    flash('Profile updated successfully!', 'success')  # Flash message
+    return redirect(url_for('main_routes.profile'))  # Redirect back to the profile page
 
 @main_routes.route('/about')
 @login_required  # Protect this route
