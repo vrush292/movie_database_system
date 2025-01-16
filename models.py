@@ -2,19 +2,21 @@ from . import db  # Import the db instance from the package
 from datetime import datetime
 from flask_login import UserMixin  # Import UserMixin
 
-class User(db.Model, UserMixin):  # Inherit from UserMixin
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)
+    bio = db.Column(db.Text, nullable=True)  # Add bio field
+    profile_picture = db.Column(db.String(200), nullable=True)  # Add profile picture field
     wishlist = db.relationship('Wishlist', backref='user', lazy=True)
 
     def is_active(self):
         return True  # This method is now inherited from UserMixin
     @property
     def wishlist_movies(self):
-        """Return a list of movie IDs in the user's wishlist."""
         return [item.movie_id for item in self.wishlist]
+        
 
 class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
